@@ -1,19 +1,15 @@
 <script setup lang="ts">
+import type { Money } from '@/types/money'
 import { formatCurrency } from '@/utils/currency'
-
-type Price = {
-  amount: number
-  code: string
-}
 
 export type Coin = {
   id: string
   symbol: string
   rankByMarketCap: number
   percentageChangeInOneHour: number
-  price: Price
-  marketCap: Price
-  tradingVolume: Price
+  price: Money
+  marketCap: Money
+  tradingVolume: Money
 }
 
 defineProps<{
@@ -48,21 +44,21 @@ const formatPercentage = (value: number): string => {
       <div class="flex justify-between">
         <span class="text-gray-600">Price:</span>
         <span class="font-medium">
-          {{ formatCurrency(coin.price.amount, coin.price.code) }}
+          {{ formatCurrency(coin.price.amount, coin.price.currency) }}
         </span>
       </div>
 
       <div class="flex justify-between">
         <span class="text-gray-600">Market Cap:</span>
         <span class="font-medium">
-          {{ formatCurrency(coin.marketCap.amount, coin.marketCap.code) }}
+          {{ formatCurrency(coin.marketCap.amount, coin.marketCap.currency) }}
         </span>
       </div>
 
       <div class="flex justify-between">
         <span class="text-gray-600">Volume:</span>
         <span class="font-medium">
-          {{ formatCurrency(coin.tradingVolume.amount, coin.tradingVolume.code) }}
+          {{ formatCurrency(coin.tradingVolume.amount, coin.tradingVolume.currency) }}
         </span>
       </div>
     </div>

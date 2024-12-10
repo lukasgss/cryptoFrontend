@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import PaginationInteraction from '@/components/PaginationInteraction.vue'
+import { getExchanges } from '@/services/exchangeService'
 import { computed, onMounted, ref } from 'vue'
 import ExchangeCard from '../components/ExchangeCard.vue'
-import type { Exchange } from '../types/Exchange'
+import type { Exchange } from '../types/exchange'
 
 type SortOptions = 'volume.value' | 'activePairs' | 'name' | 'country'
 type SortOrder = 'asc' | 'desc'
@@ -13,53 +15,30 @@ const searchQuery = ref<string>('')
 const sortBy = ref<SortOptions>('volume.value')
 const sortOrder = ref<SortOrder>('desc')
 
-const fetchExchanges = async (): Promise<void> => {
+const currentPage = ref<number>(1)
+const itemsPerPage = 12
+const totalItems = ref<number>(0)
+
+const fetchExchanges = async (page: number) => {
   try {
     loading.value = true
-    const response: Exchange[] = [
-      {
-        id: '123e4567-e89b-12d3-a456-426614174000',
-        name: 'Binance',
-        volume: {
-          value: 12840000000,
-          currency: 'USD',
-          lastUpdated: '2024-12-10T14:30:00Z',
-        },
-        country: 'Global',
-        url: 'https://binance.com',
-        activePairs: 2854,
-      },
-      {
-        id: '223e4567-e89b-12d3-a456-426614174001',
-        name: 'Coinbase',
-        volume: {
-          value: 4160000000,
-          currency: 'USD',
-          lastUpdated: '2024-12-10T14:30:00Z',
-        },
-        country: 'USA',
-        url: 'https://coinbase.com',
-        activePairs: 560,
-      },
-      {
-        id: '323e4567-e89b-12d3-a456-426614174002',
-        name: 'Kraken',
-        volume: {
-          value: 2840000000,
-          currency: 'USD',
-          lastUpdated: '2024-12-10T14:30:00Z',
-        },
-        country: 'USA',
-        url: 'https://kraken.com',
-        activePairs: 650,
-      },
-    ]
-    exchanges.value = response
+    const response = await getExchanges(page, itemsPerPage)
+
+    exchanges.value = response.items
+    totalItems.value = response.totalCount
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'An error occurred'
   } finally {
     loading.value = false
   }
+}
+
+const totalPages = computed(() => Math.ceil(totalItems.value / itemsPerPage))
+
+const handlePageChange = (page: number) => {
+  currentPage.value = Math.max(1, Math.min(page, totalPages.value))
+  fetchExchanges(page)
+  window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
 const sortedAndFilteredExchanges = computed<Exchange[]>(() => {
@@ -69,7 +48,7 @@ const sortedAndFilteredExchanges = computed<Exchange[]>(() => {
     filtered = filtered.filter(
       (exchange) =>
         exchange.name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        exchange.country.toLowerCase().includes(searchQuery.value.toLowerCase()),
+        exchange.country?.toLowerCase().includes(searchQuery.value.toLowerCase()),
     )
   }
 
@@ -87,7 +66,7 @@ const sortedAndFilteredExchanges = computed<Exchange[]>(() => {
 })
 
 onMounted(() => {
-  fetchExchanges()
+  fetchExchanges(1)
 })
 </script>
 
@@ -138,14 +117,17 @@ onMounted(() => {
       </div>
 
       <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        <div
-          v-for="exchange in sortedAndFilteredExchanges"
-          :key="exchange.id"
-          class="transition-all duration-300 hover:scale-105 hover:shadow-xl"
-        >
+        <div v-for="exchange in sortedAndFilteredExchanges" :key="exchange.id">
           <ExchangeCard :exchange="exchange" />
         </div>
       </div>
+
+      <PaginationInteraction
+        :current-page="currentPage"
+        :total-pages="totalPages"
+        :loading="loading"
+        @page-change="handlePageChange"
+      />
     </div>
   </div>
 </template>

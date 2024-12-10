@@ -1,7 +1,7 @@
 <template>
   <div class="p-8 min-h-screen bg-gradient-to-br from-indigo-50 to-blue-100">
     <router-link to="/" class="inline-flex items-center mb-6 text-blue-500 hover:text-blue-700">
-      <span class="mr-2">←</span> Back to List
+      <span class="mr-2">←</span> Back to listing
     </router-link>
 
     <div v-if="loading" class="text-center py-8">Loading coin details...</div>
@@ -23,7 +23,7 @@
             <div>
               <h2 class="text-lg font-semibold text-gray-600">Price</h2>
               <p class="text-2xl">
-                {{ formatCurrency(coin.price.amount, coin.price.code) }}
+                {{ formatCurrency(coin.price.amount, coin.price.currency) }}
               </p>
             </div>
 
@@ -42,13 +42,15 @@
         <div class="space-y-4">
           <div>
             <h2 class="text-lg font-semibold text-gray-600">Market Cap</h2>
-            <p class="text-2xl">{{ formatCurrency(coin.marketCap.amount, coin.marketCap.code) }}</p>
+            <p class="text-2xl">
+              {{ formatCurrency(coin.marketCap.amount, coin.marketCap.currency) }}
+            </p>
           </div>
 
           <div>
             <h2 class="text-lg font-semibold text-gray-600">24h Trading Volume</h2>
             <p class="text-2xl">
-              {{ formatCurrency(coin.tradingVolume.amount, coin.tradingVolume.code) }}
+              {{ formatCurrency(coin.tradingVolume.amount, coin.tradingVolume.currency) }}
             </p>
           </div>
         </div>

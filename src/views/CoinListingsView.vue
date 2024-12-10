@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import PaginationInteraction from '@/components/PaginationInteraction.vue'
 import { getCoins } from '@/services/CoinService'
 import { computed, onMounted, ref, watch } from 'vue'
 import CryptoCard, { type Coin } from './../components/CryptoCard.vue'
@@ -31,7 +32,6 @@ const fetchCoins = async (page: number) => {
     totalItems.value = response.totalCount
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'An error occurred'
-    coins.value = []
   } finally {
     loading.value = false
   }
@@ -61,25 +61,9 @@ const sortedAndFilteredCoins = computed<Coin[]>(() => {
 
 const totalPages = computed(() => Math.ceil(totalItems.value / itemsPerPage))
 
-const pageNumbers = computed(() => {
-  const pages = []
-  const maxVisiblePages = 5
-  let startPage = Math.max(1, currentPage.value - Math.floor(maxVisiblePages / 2))
-  const endPage = Math.min(totalPages.value, startPage + maxVisiblePages - 1)
-
-  if (endPage - startPage + 1 < maxVisiblePages) {
-    startPage = Math.max(1, endPage - maxVisiblePages + 1)
-  }
-
-  for (let i = startPage; i <= endPage; i++) {
-    pages.push(i)
-  }
-  return pages
-})
-
-const changePage = (page: number) => {
+const handlePageChange = (page: number) => {
   currentPage.value = Math.max(1, Math.min(page, totalPages.value))
-  fetchCoins(currentPage.value)
+  fetchCoins(page)
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
@@ -158,60 +142,12 @@ onMounted(() => {
           </router-link>
         </div>
 
-        <div v-if="totalPages > 1" class="mt-8 flex justify-center items-center gap-2">
-          <button
-            @click="changePage(currentPage - 1)"
-            :disabled="currentPage === 1 || loading"
-            class="px-4 py-2 rounded-lg border border-indigo-200 hover:bg-indigo-50 disabled:opacity-50 disabled:hover:bg-transparent disabled:cursor-not-allowed"
-          >
-            Previous
-          </button>
-
-          <button
-            v-if="pageNumbers[0] > 1"
-            @click="changePage(1)"
-            :disabled="loading"
-            class="px-4 py-2 rounded-lg border border-indigo-200 hover:bg-indigo-50"
-          >
-            1
-          </button>
-
-          <span v-if="pageNumbers[0] > 2" class="px-2">...</span>
-
-          <button
-            v-for="page in pageNumbers"
-            :key="page"
-            @click="changePage(page)"
-            :disabled="loading"
-            class="px-4 py-2 rounded-lg border"
-            :class="[
-              currentPage === page
-                ? 'bg-indigo-600 text-white border-indigo-600'
-                : 'border-indigo-200 hover:bg-indigo-50',
-            ]"
-          >
-            {{ page }}
-          </button>
-
-          <span v-if="pageNumbers[pageNumbers.length - 1] < totalPages - 1" class="px-2">...</span>
-
-          <button
-            v-if="pageNumbers[pageNumbers.length - 1] < totalPages"
-            @click="changePage(totalPages)"
-            :disabled="loading"
-            class="px-4 py-2 rounded-lg border border-indigo-200 hover:bg-indigo-50"
-          >
-            {{ totalPages }}
-          </button>
-
-          <button
-            @click="changePage(currentPage + 1)"
-            :disabled="currentPage === totalPages || loading"
-            class="px-4 py-2 rounded-lg border border-indigo-200 hover:bg-indigo-50 disabled:opacity-50 disabled:hover:bg-transparent disabled:cursor-not-allowed"
-          >
-            Next
-          </button>
-        </div>
+        <PaginationInteraction
+          :current-page="currentPage"
+          :total-pages="totalPages"
+          :loading="loading"
+          @page-change="handlePageChange"
+        />
       </div>
     </div>
   </div>
