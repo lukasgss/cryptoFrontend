@@ -1,0 +1,70 @@
+<script setup lang="ts">
+import { formatCurrency } from '@/utils/currency'
+
+type Price = {
+  amount: number
+  code: string
+}
+
+export type Coin = {
+  id: string
+  symbol: string
+  rankByMarketCap: number
+  percentageChangeInOneHour: number
+  price: Price
+  marketCap: Price
+  tradingVolume: Price
+}
+
+defineProps<{
+  coin: Coin
+}>()
+
+const formatPercentage = (value: number): string => {
+  return `${value >= 0 ? '+' : ''}${value.toFixed(2)}%`
+}
+</script>
+
+<template>
+  <div class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+    <div class="flex justify-between items-start mb-4">
+      <div>
+        <h3 class="text-xl font-bold">{{ coin.symbol }}</h3>
+        <p class="text-gray-600">Rank #{{ coin.rankByMarketCap }}</p>
+      </div>
+      <span
+        :class="[
+          'px-2 py-1 rounded text-sm',
+          coin.percentageChangeInOneHour >= 0
+            ? 'bg-green-100 text-green-800'
+            : 'bg-red-100 text-red-800',
+        ]"
+      >
+        {{ formatPercentage(coin.percentageChangeInOneHour) }}
+      </span>
+    </div>
+
+    <div class="space-y-2">
+      <div class="flex justify-between">
+        <span class="text-gray-600">Price:</span>
+        <span class="font-medium">
+          {{ formatCurrency(coin.price.amount, coin.price.code) }}
+        </span>
+      </div>
+
+      <div class="flex justify-between">
+        <span class="text-gray-600">Market Cap:</span>
+        <span class="font-medium">
+          {{ formatCurrency(coin.marketCap.amount, coin.marketCap.code) }}
+        </span>
+      </div>
+
+      <div class="flex justify-between">
+        <span class="text-gray-600">Volume:</span>
+        <span class="font-medium">
+          {{ formatCurrency(coin.tradingVolume.amount, coin.tradingVolume.code) }}
+        </span>
+      </div>
+    </div>
+  </div>
+</template>
