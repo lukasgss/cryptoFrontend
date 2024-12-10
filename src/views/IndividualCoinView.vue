@@ -87,10 +87,6 @@ const fetchCoinDetails = async () => {
   }
 }
 
-const formatDate = (dateString: string): string => {
-  return new Date(dateString).toLocaleString()
-}
-
 onMounted(() => {
   fetchCoinDetails()
 })
