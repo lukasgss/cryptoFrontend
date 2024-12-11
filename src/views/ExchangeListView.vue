@@ -117,7 +117,13 @@ onMounted(() => {
       </div>
 
       <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        <div v-for="exchange in sortedAndFilteredExchanges" :key="exchange.id">
+        <div
+          v-if="sortedAndFilteredExchanges.length === 0"
+          class="w-full col-span-full text-center py-8 text-gray-500 bg-gray-50 rounded-lg border border-gray-200"
+        >
+          There are no exchanges or none of them match your search criteria
+        </div>
+        <div v-else v-for="exchange in sortedAndFilteredExchanges" :key="exchange.id">
           <ExchangeCard :exchange="exchange" />
         </div>
       </div>
